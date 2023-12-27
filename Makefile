@@ -18,3 +18,10 @@ generate-project:
 		-Dversion=1.0                                \
 		-Dpackage=com.pluralsight.flink              \
 		# END
+
+download-dataset:
+	[ -d src/main/resources/ml-latest-small ] || \
+	( cd src/main/resources && \
+		curl -O https://files.grouplens.org/datasets/movielens/ml-latest-small.zip && \
+	  	unzip ml-latest-small.zip \
+	)
