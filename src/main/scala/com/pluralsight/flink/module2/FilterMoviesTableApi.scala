@@ -1,6 +1,8 @@
 package com.pluralsight.flink.module2
 
+import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api._
+import org.slf4j.LoggerFactory
 
 /**
   * FilterMovies with TableApi
@@ -8,10 +10,11 @@ import org.apache.flink.table.api._
   * https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/tableapi/
   */
 object FilterMoviesTableApi {
+  private val LOG = LoggerFactory.getLogger(getClass)
 
   def main(args: Array[String]): Unit = {
-    val appArgs: AppArgs = AppArgs.parse(args).getOrElse(throw new IllegalArgumentException)
-    val basePath: String = appArgs.basePath
+    val parameters = ParameterTool.fromArgs(args)
+    val basePath: String = parameters.get("basePath", ".")
     val path: String = s"$basePath/src/main/resources/ml-latest-small/movies.csv"
 
     val settings = EnvironmentSettings.newInstance().inBatchMode().build()
@@ -24,7 +27,6 @@ object FilterMoviesTableApi {
       .column("name", DataTypes.STRING())
       .column("genres", DataTypes.STRING())
       .build()
-
 
     val tableDescriptor: TableDescriptor = TableDescriptor
       .forConnector("filesystem")

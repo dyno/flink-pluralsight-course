@@ -1,12 +1,15 @@
 package com.pluralsight.flink.module2
 
+import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.api.scala.{createTypeInformation, ExecutionEnvironment}
+import org.slf4j.LoggerFactory
 
 object FilterMovies {
+  private val LOG = LoggerFactory.getLogger(getClass)
 
   def main(args: Array[String]): Unit = {
-    val appArgs: AppArgs = AppArgs.parse(args).getOrElse(throw new IllegalArgumentException)
-    val basePath: String = appArgs.basePath
+    val parameters = ParameterTool.fromArgs(args)
+    val basePath: String = parameters.get("basePath", ".")
     val path: String = s"$basePath/src/main/resources/ml-latest-small/movies.csv"
 
     val env: ExecutionEnvironment = ExecutionEnvironment.getExecutionEnvironment

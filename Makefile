@@ -4,7 +4,8 @@ SHELL = /bin/bash
 BASEPATH := /usr/local/Cellar/apache-flink/1.18.0/libexec
 
 start-cluster:
-	$(BASEPATH)/bin/start-cluster.sh
+	$(BASEPATH)/bin/start-cluster.sh \
+		-Dtaskmanager.numberOfTaskSlots=16
 
 # https://central.sonatype.com/artifact/org.apache.flink/flink-quickstart-scala/versions
 # https://mvnrepository.com/artifact/org.apache.flink/flink-quickstart-scala
