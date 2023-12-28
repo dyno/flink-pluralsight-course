@@ -1,5 +1,6 @@
 plugins {
     id 'flink-app-conventions'
+
 }
 
 dependencies {
@@ -7,15 +8,18 @@ dependencies {
     runtimeOnly 'org.apache.logging.log4j:log4j-api:2.17.1'
     runtimeOnly 'org.apache.logging.log4j:log4j-core:2.17.1'
 
+
     implementation 'org.apache.flink:flink-table-api-scala-bridge_2.12:1.18.0'
     implementation 'org.apache.flink:flink-streaming-scala_2.12:1.18.0'
-
     runtimeOnly 'org.apache.flink:flink-connector-files:1.18.0'
     runtimeOnly 'org.apache.flink:flink-csv:1.18.0'
     runtimeOnly 'org.apache.flink:flink-table-planner_2.12:1.18.0'
     runtimeOnly 'org.apache.flink:flink-clients:1.18.0'
 
-    compileOnly 'org.scala-lang:scala-library:2.12.18'
+    implementation 'com.github.scopt:scopt_2.12:4.0.1'
+    runtimeOnly 'org.scala-lang:scala-library:2.12.18'
+    runtimeOnly 'org.scala-lang:scala-reflect:2.12.18'
+    runtimeOnly 'org.scala-lang:scala-compiler:2.12.18'
 }
 
 group = 'flink-pluralsight-course'
@@ -23,4 +27,8 @@ version = '1.0.0'
 description = 'Flink Quickstart Job'
 
 shadowJar {
+}
+
+application {
+    mainClassName = 'com.pluralsight.flink.module2.FilterMovies'
 }

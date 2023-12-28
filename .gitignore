@@ -5,7 +5,8 @@
 hs_err_pid*
 
 # local
+*.zip
 .gradle/
 build/
+filter-output/
 zold/
-*.zip
