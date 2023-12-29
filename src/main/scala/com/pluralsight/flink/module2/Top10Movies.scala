@@ -15,13 +15,15 @@ object Top10Movies {
 
     val ratingPath: String = s"$basePath/src/main/resources/ml-latest-small/ratings.csv"
     val moviePath: String = s"$basePath/src/main/resources/ml-latest-small/movies.csv"
+    val topN: Int = 10
 
     val env = ExecutionEnvironment.getExecutionEnvironment
+    LOG.info(s"env.getParallelism=${env.getParallelism}")
 
     // userId,movieId,rating,timestamp
     val sorted = env
       .readCsvFile[(Long, Double)](ratingPath, ignoreFirstLine = true, includedFields = Array(1, 2))
-      .groupBy(0) // group by movieId
+      .groupBy(0) // DataSet of (movieId, score) and group by movieId
       .reduceGroup(
         // https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/dev/dataset/transformations/#groupreduce-on-dataset-grouped-by-field-position-keys-tuple-datasets-only
         (in: Iterator[(Long, Double)], out: Collector[(Long, Double, Long)]) => {
@@ -32,16 +34,10 @@ object Top10Movies {
           if (count > 50) { out.collect((movieId, sum / count, count)) }
         }
       )
-      .setParallelism(5)
-      .partitionCustom((score: Double, numPartitions: Int) => score.intValue() % numPartitions, 1)
-      .sortPartition(1, Order.DESCENDING)
+      .partitionCustom((movieId: Long, numPartitions: Int) => movieId.toInt % numPartitions, 0)
+      .sortPartition(1, Order.DESCENDING) // order by average rating
       .mapPartition((in: Iterator[(Long, Double, Long)], out: Collector[(Long, Double, Long)]) => {
-        in.take(10).foreach { out.collect }
-      })
-      .setParallelism(1)
-      .sortPartition(1, Order.DESCENDING)
-      .mapPartition((in: Iterator[(Long, Double, Long)], out: Collector[(Long, Double, Long)]) => {
-        in.take(100).foreach { out.collect }
+        in.take(topN).foreach { out.collect }
       })
 
     // movieId,title,genres
@@ -56,11 +52,11 @@ object Top10Movies {
         val (_, score, count) = sorted
         (movieId, name, score, count)
       }
-      .setParallelism(1)
-      .sortPartition(2, Order.DESCENDING)
       .collect()
+      .sortBy(_._3)
+      .reverse
+      .take(topN)
 
-    // XXX: the algorithm here seems wrong, as the result is not what we are expecting.
-    LOG.info("Top 10 movies:\n{}", r.zipWithIndex.map({ case (m, idx) => f"${idx + 1}%-2d -> $m" }).mkString("\n"))
+    LOG.info(s"Top $topN movies:\n{}", r.zipWithIndex.map({ case (m, idx) => f"${idx + 1}%-2d -> $m" }).mkString("\n"))
   }
 }
