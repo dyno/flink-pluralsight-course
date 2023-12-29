@@ -1,3 +1,5 @@
+-- https://arrow.apache.org/datafusion/user-guide/cli.html#creating-external-tables
+
 CREATE EXTERNAL TABLE ratings STORED AS CSV WITH HEADER ROW LOCATION 'src/main/resources/ml-latest-small/ratings.csv';
 
 
