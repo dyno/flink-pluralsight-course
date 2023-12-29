@@ -5,6 +5,9 @@ import org.apache.flink.streaming.connectors.twitter.TwitterSource
 
 import java.util.Properties
 
+/**
+  * XXX: not working, because twitter api v1.1 is gone.
+  */
 object FilterEnglishTweets {
 
   def main(args: Array[String]): Unit = {
