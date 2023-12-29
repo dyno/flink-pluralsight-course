@@ -29,11 +29,11 @@ object Top10Movies {
             case ((_, sum, count), (movieId, score)) => (movieId, sum + score, count + 1)
           }
 
-          if (count > 50) { out.collect((movieId, sum, count)) }
+          if (count > 50) { out.collect((movieId, sum / count, count)) }
         }
       )
-      .partitionCustom((score: Double, numPartitions: Int) => (score.intValue() - 1) % numPartitions, 1)
       .setParallelism(5)
+      .partitionCustom((score: Double, numPartitions: Int) => score.intValue() % numPartitions, 1)
       .sortPartition(1, Order.DESCENDING)
       .mapPartition((in: Iterator[(Long, Double, Long)], out: Collector[(Long, Double, Long)]) => {
         in.take(10).foreach { out.collect }
@@ -41,7 +41,7 @@ object Top10Movies {
       .setParallelism(1)
       .sortPartition(1, Order.DESCENDING)
       .mapPartition((in: Iterator[(Long, Double, Long)], out: Collector[(Long, Double, Long)]) => {
-        in.take(10).foreach { out.collect }
+        in.take(100).foreach { out.collect }
       })
 
     // movieId,title,genres
@@ -51,9 +51,16 @@ object Top10Movies {
     val r = movies
       .join(sorted)
       .where(0)
-      .equalTo(0) { (movie, sorted) => (movie._1, movie._2, sorted._2) }
+      .equalTo(0) { (movie, sorted) =>
+        val (movieId, name) = movie
+        val (_, score, count) = sorted
+        (movieId, name, score, count)
+      }
+      .setParallelism(1)
+      .sortPartition(2, Order.DESCENDING)
       .collect()
 
-    LOG.info("Top 10 movies:\n{}", r.zipWithIndex.map({ case (m, idx) => idx + 1 -> m }).mkString("\n"))
+    // XXX: the algorithm here seems wrong, as the result is not what we are expecting.
+    LOG.info("Top 10 movies:\n{}", r.zipWithIndex.map({ case (m, idx) => f"${idx + 1}%-2d -> $m" }).mkString("\n"))
   }
 }
