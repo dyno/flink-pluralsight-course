@@ -31,7 +31,7 @@ shadowJar {
 }
 
 application {
-    applicationDefaultJvmArgs = ["-Dlog4j2.configurationFile=file:${project.projectDir}/log4j2.properties"]
+    // applicationDefaultJvmArgs = ["-Dlog4j2.configurationFile=file:${project.projectDir}/log4j2.properties"]
 
     // mainClassName = 'com.pluralsight.flink.module2.FilterMovies'
     // mainClassName = 'com.pluralsight.flink.module2.AverageRating'

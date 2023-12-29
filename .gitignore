@@ -11,5 +11,6 @@ hs_err_pid*
 build/
 filter-output
 filter-output/
-zold/
+logs/
 twitter.properties
+zold/
